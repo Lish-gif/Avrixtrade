@@ -1,0 +1,356 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+  <title>Avrixtrade</title>  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      background-color: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    #content {
+      width: 100%;
+    }
+
+    h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    form {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 100%;
+    }
+
+    label {
+      font-weight: bold;
+      color: #444;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .amount-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .amount-group button {
+      width: 35px;
+      height: 35px;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .amount-group button:hover {
+      background-color: #0056b3;
+    }
+
+    .amount-group input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .price-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .price-buttons button {
+      flex: 1 1 calc(50% - 8px);
+      min-width: calc(50% - 8px);
+      padding: 10px;
+      background-color: #ffc107;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .price-buttons button:hover {
+      background-color: #e0a800;
+    }
+
+    button[type="submit"] {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #218838;
+    }
+
+    @media (max-width: 400px) {
+      .price-buttons button {
+        flex: 1 1 100%;
+        min-width: 100%;
+      }
+    }
+
+    /* Loading spinner styles */
+    .spinner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #e6f2ff; /* Light blue background */
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .triple-spinner {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      z-index: 1002;
+    }
+
+    .triple-spinner div {
+      position: absolute;
+      border-radius: 50%;
+      border: 8px solid transparent;
+      animation: rotate 1.5s linear infinite;
+    }
+
+    .triple-spinner div:nth-child(1) {
+      width: 100%;
+      height: 100%;
+      border-top-color: #007bff;
+      border-bottom-color: #007bff;
+    }
+
+    .triple-spinner div:nth-child(2) {
+      width: 70%;
+      height: 70%;
+      top: 15%;
+      left: 15%;
+      border-top-color: #ff0000;
+      border-bottom-color: #ff0000;
+      animation-delay: 0.2s;
+    }
+
+    .triple-spinner div:nth-child(3) {
+      width: 40%;
+      height: 40%;
+      top: 30%;
+      left: 30%;
+      border-top-color: #000000;
+      border-bottom-color: #000000;
+      animation-delay: 0.4s;
+    }
+
+    /* Dollar bill animation */
+    .dollar {
+      position: absolute;
+      color: #2ecc71;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 1001;
+      animation: falling linear forwards;
+      opacity: 0.7;
+    }
+
+    @keyframes rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes falling {
+      0% {
+        transform: translate(0, -100px) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translate(calc(-100vw + 50px), calc(100vh + 50px)) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>  
+<body>  
+  <div id="content">
+    <h2>Avrixtrade</h2>  
+    <form id="paymentForm">  
+      <label>Amount (KES):</label>  
+      <div class="amount-group">
+        <button type="button" onclick="changeAmount(-100)">–</button>
+        <input type="number" id="amount" value="1000" required min="100">
+        <button type="button" onclick="changeAmount(100)">+</button>
+      </div>
+
+      <div class="price-buttons">
+        <button type="button" onclick="setAmount(100)">100</button>
+        <button type="button" onclick="setAmount(500)">500</button>
+        <button type="button" onclick="setAmount(1000)">1000</button>
+        <button type="button" onclick="setAmount(2000)">2000</button>
+        <button type="button" onclick="setAmount(10000)">10000</button>
+        <button type="button" onclick="setAmount(100000)">100000</button>
+      </div>
+
+      <button type="submit" id="submitBtn">Payment Processing</button>  
+    </form>
+  </div>
+
+  <div class="spinner" id="spinner">
+    <div class="triple-spinner">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+  
+  <script>  
+    function changeAmount(change) {
+      const input = document.getElementById("amount");
+      let current = parseInt(input.value) || 0;
+      current = Math.max(100, current + change);
+      input.value = current;
+    }
+
+    function setAmount(value) {
+      document.getElementById("amount").value = value;
+    }
+
+    function createDollars() {
+      const spinner = document.getElementById("spinner");
+      const dollarSigns = ['💰', '💵', '💲', '🤑'];
+      
+      // Create 10 dollar elements
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          const dollar = document.createElement("div");
+          dollar.className = "dollar";
+          dollar.textContent = dollarSigns[Math.floor(Math.random() * dollarSigns.length)];
+          
+          // Random starting position on right side
+          const startX = Math.random() * 100 + 100;
+          dollar.style.left = `calc(100vw - ${startX}px)`;
+          dollar.style.top = "-50px";
+          
+          // Random animation duration (3-6 seconds)
+          const duration = 3 + Math.random() * 3;
+          dollar.style.animationDuration = `${duration}s`;
+          
+          // Random delay (0-3 seconds)
+          dollar.style.animationDelay = `${Math.random() * 3}s`;
+          
+          spinner.appendChild(dollar);
+          
+          // Remove element after animation completes
+          setTimeout(() => {
+            dollar.remove();
+          }, duration * 1000);
+        }, i * 300); // Stagger creation
+      }
+      
+      // Keep creating new dollars while spinner is visible
+      if (spinner.style.display === "flex") {
+        setTimeout(createDollars, 3000);
+      }
+    }
+
+    document.getElementById("paymentForm").addEventListener("submit", function(e) {  
+      e.preventDefault();  
+      const amount = document.getElementById("amount").value * 100;
+      const submitBtn = document.getElementById("submitBtn");
+      const spinner = document.getElementById("spinner");
+      const content = document.getElementById("content");
+
+      // Hide content and show spinner
+      content.style.display = "none";
+      spinner.style.display = "flex";
+      
+      // Start dollar animation
+      createDollars();
+
+      fetch("https://api.paystack.co/transaction/initialize", {  
+        method: "POST",  
+        headers: {  
+          Authorization: "Bearer sk_live_fc93fa8aa92d1cd68fb6d44741308c774a97ee73",  
+          "Content-Type": "application/json",  
+        },  
+        body: JSON.stringify({  
+          email: "avrixtrade@game.com",  
+          amount: amount  
+        })  
+      })  
+      .then(res => res.json())  
+      .then(data => {  
+        if (data.status) {  
+          window.location.href = data.data.authorization_url;  
+        } else {  
+          // Show content and hide spinner on error
+          content.style.display = "block";
+          spinner.style.display = "none";
+          submitBtn.disabled = false;
+          alert("Error: " + data.message);  
+        }  
+      })  
+      .catch(error => {  
+        console.error("Error:", error);  
+        // Show content and hide spinner on error
+        content.style.display = "block";
+        spinner.style.display = "none";
+        submitBtn.disabled = false;
+        alert("Something went wrong");  
+      });  
+    });  
+  </script>  
+</body>  
+</html>
